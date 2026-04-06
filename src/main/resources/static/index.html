@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Attendance Dashboard</title>
+</head>
+<body style="font-family: Arial; text-align:center; background-color:#f5f5f5;">
+
+    <h1>Smart Attendance System</h1>
+
+    <table border="1" style="margin:auto; padding:10px; background:white;">
+        <tr>
+            <th>Name</th>
+            <th>Time</th>
+        </tr>
+        <tbody id="data"></tbody>
+    </table>
+
+    <script>
+        function loadData() {
+            fetch('/attendance')
+                .then(res => res.json())
+                .then(data => {
+                    let table = document.getElementById("data");
+                    table.innerHTML = "";
+
+                    data.forEach(row => {
+                        table.innerHTML += `<tr>
+                            <td>${row.name}</td>
+                            <td>${row.time}</td>
+                        </tr>`;
+                    });
+                });
+        }
+
+        loadData();
+
+        // Auto refresh every 3 seconds
+        setInterval(loadData, 3000);
+    </script>
+
+</body>
+</html>
