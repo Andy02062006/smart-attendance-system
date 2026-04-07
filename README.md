@@ -1,25 +1,29 @@
 # Smart Attendance System
 
-This project uses facial recognition to automate attendance marking.
+Automated attendance tracking using facial recognition.
 
-## Technologies Used
-- Python (OpenCV, face_recognition)
-- Spring Boot
-- HTML/CSS
+## Setup
+
+1. **Install dependencies**
+   ```bash
+   pip install opencv-python face_recognition pandas
+   ```
+
+2. **Run the application**
+   ```bash
+   python smart_attendance.py
+   ```
+
+3. **Open in browser**
+   ```
+   http://localhost:8080/login.html
+   ```
+
+## Login
+- Username: your username
+- Password: your password
 
 ## Features
-- Face detection and recognition
+- Simple login page
+- Face recognition
 - Automatic attendance logging
-- Real-time dashboard
-
-## How to Run
-
-1. Run Python script:
-   python smart_attendance.py
-
-2. Run Spring Boot:
-   cd attendance
-   ./mvnw spring-boot:run
-
-3. Open:
-   http://localhost:8080/index.html
