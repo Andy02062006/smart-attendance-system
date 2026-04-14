@@ -9,12 +9,17 @@ Automated attendance tracking using facial recognition.
    pip install opencv-python face_recognition pandas
    ```
 
-2. **Run the application**
+2. **Run the face recognition script**
    ```bash
    python smart_attendance.py
    ```
 
-3. **Open in browser**
+3. **Run the web application (Maven)**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+4. **Open in browser**
    ```
    http://localhost:8080/login.html
    ```
