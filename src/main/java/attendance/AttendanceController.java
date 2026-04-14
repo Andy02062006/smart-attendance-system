@@ -31,12 +31,15 @@ public class AttendanceController {
         public Map<String, String> openCamera() {
             Map<String, String> response = new HashMap<>();
             try {
-                // Call the python script
+                // Call the python script and inherit IO so output shows in console
                 ProcessBuilder pb = new ProcessBuilder("python3", "smart_attendance.py");
+                pb.inheritIO(); 
                 pb.start();
                 response.put("status", "success");
                 response.put("message", "Camera opened successfully");
+                System.out.println("Starting smart_attendance.py...");
             } catch (Exception e) {
+                System.err.println("Failed to start camera process: " + e.getMessage());
                 response.put("status", "error");
                 response.put("message", e.getMessage());
             }
