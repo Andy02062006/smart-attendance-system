@@ -1,31 +1,17 @@
-package com.attendance.controller;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.attendance.service.AuthService;
-import com.attendance.model.User;
-import java.util.HashMap;
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/auth")
-public class AuthController {
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    @Autowired
-    private AuthService authService;
-    
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginRequest) {
-        try {
-            String token = authService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.status(401).body(error);
-        }
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Simple login logic: accept any non-empty username/password
+    if (username && password) {
+        console.log('Login successful for:', username);
+        // Save simple flag for "auth" (not secure, but simple as requested)
+        localStorage.setItem('isAuthenticated', 'true');
+        window.location.href = 'index.html';
+    } else {
+        errorMessage.textContent = 'Please enter both username and password.';
     }
-}
+});
