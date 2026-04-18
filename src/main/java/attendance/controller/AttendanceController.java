@@ -1,21 +1,21 @@
 package attendance.controller;
 
-import attendance.model.Attendance;
+import attendance.model.AttendanceRecord;
 import attendance.service.CSVService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import java.util.*;
 
 @Controller
-@RestController // Combine for simplicity
+@RestController
 @RequestMapping("/api")
 public class AttendanceController {
 
-    @GetMapping("/") // Redirect from root
+    @GetMapping("/")
     public String home() { return "redirect:/login.html"; }
 
     @GetMapping("/attendance")
-    public List<Attendance> get() { return CSVService.getAttendance(); }
+    public List<AttendanceRecord> get() { return CSVService.getAttendance(); }
 
     @GetMapping("/download")
     public org.springframework.core.io.Resource download() {
@@ -23,7 +23,7 @@ public class AttendanceController {
     }
 
     @PostMapping("/attendance")
-    public Attendance mark(@RequestBody Attendance a) {
+    public AttendanceRecord mark(@RequestBody AttendanceRecord a) {
         CSVService.saveAttendance(a);
         return a;
     }

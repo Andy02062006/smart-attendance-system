@@ -17,6 +17,7 @@ while True:
     small = cv2.resize(frame, (0,0), fx=0.25, fy=0.25)
     rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
     
+    # Use Case: Face recognition and analysis
     locs = face_recognition.face_locations(rgb)
     encs = face_recognition.face_encodings(rgb, locs)
 
@@ -25,15 +26,20 @@ while True:
         name = "Unknown"
         if len(dist) > 0 and np.min(dist) < 0.5:
             name = names[np.argmin(dist)]
-            # SRS: Mark with "Active" engagement
+            # SRS/Diagram: Mark AttendanceRecord (Present, Active)
             requests.post("http://localhost:8080/api/attendance", 
-                          json={"name": name, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "engagement": "Active"})
+                          json={
+                              "name": name, 
+                              "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                              "status": "Present",
+                              "engagement": "Active"
+                          })
 
         top, right, bottom, left = [v * 4 for v in loc]
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-    cv2.imshow("Attendance", frame)
+    cv2.imshow("SmartSense: Recognition", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'): break
 
 video.release()
