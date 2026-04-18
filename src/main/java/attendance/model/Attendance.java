@@ -1,20 +1,15 @@
 package attendance.model;
 
 public class Attendance {
+    public String name;
+    public String time;
+    public String engagement; // SRS: Engagement Monitoring
 
-    private String name;
-    private String time;
+    public Attendance() {}
 
-    public Attendance(String name, String time) {
+    public Attendance(String name, String time, String engagement) {
         this.name = name;
         this.time = time;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getTime() {
-        return time;
+        this.engagement = engagement;
     }
 }

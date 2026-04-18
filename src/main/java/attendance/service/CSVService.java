@@ -5,44 +5,28 @@ import java.io.*;
 import java.util.*;
 
 public class CSVService {
-    private static final String CSV_FILE = "attendance.csv";
+    static String FILE = "attendance.csv";
 
     public static List<Attendance> getAttendance() {
         List<Attendance> list = new ArrayList<>();
-        File file = new File(CSV_FILE);
-        
-        if (!file.exists()) {
-            return list;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            br.readLine(); // skip header
-
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 2) {
-                    list.add(new Attendance(data[0], data[1]));
-                }
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE))) {
+            br.readLine(); 
+            String l;
+            while ((l = br.readLine()) != null) {
+                String[] d = l.split(",");
+                if (d.length >= 3) list.add(new Attendance(d[0], d[1], d[2]));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        } catch (Exception e) {}
         return list;
     }
 
-    public static void saveAttendance(Attendance attendance) {
-        File file = new File(CSV_FILE);
-        boolean exists = file.exists();
-        
-        try (PrintWriter pw = new PrintWriter(new FileWriter(file, true))) {
-            if (!exists) {
-                pw.println("Name,Time");
-            }
-            pw.println(attendance.getName() + "," + attendance.getTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void saveAttendance(Attendance a) {
+        String today = java.time.LocalDate.now().toString();
+        for (Attendance e : getAttendance()) 
+            if (e.name.equalsIgnoreCase(a.name) && e.time.startsWith(today)) return;
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE, true))) {
+            pw.println(a.name + "," + a.time + "," + a.engagement);
+        } catch (Exception e) {}
     }
 }
