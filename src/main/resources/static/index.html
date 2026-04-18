@@ -3,26 +3,28 @@
 <head>
     <title>SmartSense Dashboard</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; }
-        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .stat { font-size: 2em; font-weight: bold; color: #6366f1; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
-        button { padding: 10px 20px; cursor: pointer; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; margin-right: 5px; }
-        .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 25px; background: #f8fafc; color: #1e293b; }
+        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .stat { font-size: 2.5em; font-weight: bold; color: #6366f1; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 1.1em; }
+        th, td { border-bottom: 1px solid #f1f5f9; padding: 15px; text-align: left; }
+        th { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.05em; }
+        button { padding: 12px 24px; cursor: pointer; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: bold; margin-right: 10px; font-size: 1em; transition: all 0.2s; }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        .badge { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-left: 5px solid #6366f1; }
+        h2, h3 { margin: 0; }
     </style>
 </head>
 <body>
     <div class="card header">
-        <h2 id="title">SmartSense Dashboard</h2>
+        <h2>SmartSense Dashboard</h2>
         <div>
-            <span id="userInfo" style="margin-right:20px; font-weight:bold"></span>
-            <!-- Conditional Actions -->
+            <span id="userInfo" style="margin-right:25px; color: #475569; font-weight:500"></span>
             <button id="btnRecognition" onclick="fetch('/api/open-camera', {method:'POST'})">Start Recognition</button>
             <button onclick="load()" style="background:#3b82f6">Sync Data</button>
-            <button id="btnReport" onclick="location.href='/api/download'" style="background:#64748b">Generate Report</button>
+            <button id="btnReport" onclick="location.href='/api/download'" style="background:#64748b">Report</button>
             <button onclick="logout()" style="background:#ef4444">Logout</button>
         </div>
     </div>
@@ -30,13 +32,13 @@
     <div class="grid">
         <div class="card">
             <h3>Engagement Metrics</h3>
-            <p>Total Student Attendance</p>
+            <p style="color: #64748b;">Total Students Present Today</p>
             <div id="total" class="stat">0</div>
         </div>
         <div class="card">
-            <h3>Attendance Records</h3>
+            <h3>Attendance Log</h3>
             <table>
-                <thead><tr><th>Student</th><th>Time</th><th>Status</th><th>Engagement</th></tr></thead>
+                <thead><tr><th>Student</th><th>Timestamp</th><th>Status</th><th>Engagement</th></tr></thead>
                 <tbody id="list"></tbody>
             </table>
         </div>
@@ -45,16 +47,12 @@
     <script>
         const role = localStorage.getItem('role');
         const user = localStorage.getItem('user');
-
         if (!role) location.href = '/login.html';
-
         document.getElementById('userInfo').innerText = `${user} (${role})`;
         
-        // Role-Based Access Control
+        // Simplified Logic: Admin removed, Teacher is the privileged role
         if (role === 'Student') {
             document.getElementById('btnRecognition').style.display = 'none';
-            document.getElementById('btnReport').style.display = 'none';
-        } else if (role === 'Teacher') {
             document.getElementById('btnReport').style.display = 'none';
         }
 
