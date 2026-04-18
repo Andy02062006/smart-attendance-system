@@ -9,29 +9,29 @@
         .stat { font-size: 2em; font-weight: bold; color: #6366f1; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
-        button { padding: 10px 20px; cursor: pointer; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; }
+        button { padding: 10px 20px; cursor: pointer; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; margin-right: 5px; }
         .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="card header">
-        <h2>SmartSense: Smart Attendance & Engagement</h2>
+        <h2 id="title">SmartSense Dashboard</h2>
         <div>
-            <button onclick="fetch('/api/open-camera', {method:'POST'})">Face Recognition & Analysis</button>
-            <button onclick="load()" style="background:#3b82f6">Sync Dashboard</button>
-            <button onclick="location.href='/api/download'" style="background:#64748b">Generate Report</button>
-            <a href="/logout" style="margin-left:20px; color:#ef4444; text-decoration:none">Logout</a>
+            <span id="userInfo" style="margin-right:20px; font-weight:bold"></span>
+            <!-- Conditional Actions -->
+            <button id="btnRecognition" onclick="fetch('/api/open-camera', {method:'POST'})">Start Recognition</button>
+            <button onclick="load()" style="background:#3b82f6">Sync Data</button>
+            <button id="btnReport" onclick="location.href='/api/download'" style="background:#64748b">Generate Report</button>
+            <button onclick="logout()" style="background:#ef4444">Logout</button>
         </div>
     </div>
 
     <div class="grid">
         <div class="card">
-            <h3>Use Case: Engagement Metrics</h3>
+            <h3>Engagement Metrics</h3>
             <p>Total Student Attendance</p>
             <div id="total" class="stat">0</div>
-            <hr>
-            <p>System Status: <span style="color:green">Active</span></p>
         </div>
         <div class="card">
             <h3>Attendance Records</h3>
@@ -43,6 +43,21 @@
     </div>
 
     <script>
+        const role = localStorage.getItem('role');
+        const user = localStorage.getItem('user');
+
+        if (!role) location.href = '/login.html';
+
+        document.getElementById('userInfo').innerText = `${user} (${role})`;
+        
+        // Role-Based Access Control
+        if (role === 'Student') {
+            document.getElementById('btnRecognition').style.display = 'none';
+            document.getElementById('btnReport').style.display = 'none';
+        } else if (role === 'Teacher') {
+            document.getElementById('btnReport').style.display = 'none';
+        }
+
         function load() {
             fetch('/api/attendance').then(r => r.json()).then(data => {
                 document.getElementById('list').innerHTML = data.map(r => 
@@ -52,6 +67,7 @@
                 document.getElementById('total').innerText = data.length;
             });
         }
+        function logout() { localStorage.clear(); location.href = '/login.html'; }
         setInterval(load, 3000); load();
     </script>
 </body>
