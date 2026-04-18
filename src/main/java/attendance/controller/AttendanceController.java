@@ -18,8 +18,12 @@ public class AttendanceController {
     public List<AttendanceRecord> get() { return CSVService.getAttendance(); }
 
     @GetMapping("/download")
-    public org.springframework.core.io.Resource download() {
-        return new org.springframework.core.io.FileSystemResource("attendance.csv");
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.Resource> download() {
+        org.springframework.core.io.Resource file = new org.springframework.core.io.FileSystemResource("attendance.csv");
+        return org.springframework.http.ResponseEntity.ok()
+            .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"attendance_report.csv\"")
+            .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "text/csv")
+            .body(file);
     }
 
     @PostMapping("/attendance")
