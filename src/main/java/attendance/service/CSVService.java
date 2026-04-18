@@ -1,5 +1,6 @@
-package attendance;
+package attendance.service;
 
+import attendance.model.Attendance;
 import java.io.*;
 import java.util.*;
 

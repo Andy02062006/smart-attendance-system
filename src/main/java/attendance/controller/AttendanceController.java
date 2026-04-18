@@ -1,5 +1,7 @@
-package attendance;
+package attendance.controller;
 
+import attendance.model.Attendance;
+import attendance.service.CSVService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import java.util.*;
