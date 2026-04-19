@@ -29,4 +29,25 @@ public class CSVService {
             pw.println(a.name + "," + a.time + "," + a.status + "," + a.engagement);
         } catch (Exception e) {}
     }
+
+    public static void resetAttendance() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE))) {
+            pw.println("name,time,status,engagement"); 
+        } catch (Exception e) {}
+    }
+
+    public static Map<String, Object> getStats() {
+        List<AttendanceRecord> records = getAttendance();
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalAttendance", records.size());
+        
+        long active = records.stream().filter(r -> "Active".equalsIgnoreCase(r.engagement)).count();
+        long drowsy = records.stream().filter(r -> "Drowsy".equalsIgnoreCase(r.engagement)).count();
+        long distracted = records.stream().filter(r -> "Distracted".equalsIgnoreCase(r.engagement)).count();
+        
+        stats.put("active", active);
+        stats.put("drowsy", drowsy);
+        stats.put("distracted", distracted);
+        return stats;
+    }
 }

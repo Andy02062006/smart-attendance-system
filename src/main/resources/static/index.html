@@ -1,72 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SmartSense Dashboard</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 25px; background: #f8fafc; color: #1e293b; }
-        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .stat { font-size: 2.5em; font-weight: bold; color: #6366f1; margin: 10px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 1.1em; }
-        th, td { border-bottom: 1px solid #f1f5f9; padding: 15px; text-align: left; }
-        th { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.05em; }
-        button { padding: 12px 24px; cursor: pointer; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: bold; margin-right: 10px; font-size: 1em; transition: all 0.2s; }
-        button:hover { opacity: 0.9; transform: scale(1.02); }
-        .badge { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-left: 5px solid #6366f1; }
-        h2, h3 { margin: 0; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSense | Dashboard</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="card header">
-        <h2>SmartSense Dashboard</h2>
-        <div>
-            <span id="userInfo" style="margin-right:25px; color: #475569; font-weight:500"></span>
-            <button id="btnRecognition" onclick="fetch('/api/open-camera', {method:'POST'})">Start Recognition</button>
-            <button onclick="load()" style="background:#3b82f6">Sync Data</button>
-            <button id="btnReport" onclick="location.href='/api/download'" style="background:#64748b">Report</button>
-            <button onclick="logout()" style="background:#ef4444">Logout</button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">SmartSense</div>
+        <ul class="nav-links">
+            <li class="nav-item active">Dashboard</li>
+            <li id="nav-monitor" class="nav-item" onclick="startRecognition()">Live Monitor</li>
+            <li id="nav-reports" class="nav-item" onclick="location.href='/api/download'">Reports</li>
+            <li id="nav-admin" class="nav-item" style="display:none;" onclick="resetData()">System Reset</li>
+        </ul>
+        <div class="nav-item logout" onclick="logout()">Logout</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Welcome Back</h1>
+                <p class="subtitle" id="dateString"></p>
+            </div>
+            <div class="user-profile">
+                <span id="userName">User</span>
+                <span id="userRoleBadge" class="badge">Role</span>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <p class="stat-label">Total Present</p>
+                <div id="stat-total" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Active Focus</p>
+                <div id="stat-active" class="stat-value" style="color: var(--accent-green)">0</div>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Drowsy/Tired</p>
+                <div id="stat-drowsy" class="stat-value" style="color: #fbbf24">0</div>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Distracted</p>
+                <div id="stat-distracted" class="stat-value" style="color: var(--accent-red)">0</div>
+            </div>
+        </div>
+
+        <!-- Role Based Controls -->
+        <div id="teacher-controls" class="section" style="display:none; margin-bottom: 24px;">
+            <h3>Lecture Controls</h3>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startRecognition()">Start AI Analysis</button>
+                <button id="recordBtn" class="btn btn-outline" onclick="toggleRecording()">Start Lecture Recording</button>
+                <div id="recordingStatus"><span class="pulse">●</span> Recording Live...</div>
+            </div>
+        </div>
+
+        <div class="dashboard-sections">
+            <!-- Analytics Chart -->
+            <div class="section">
+                <h3>Engagement Overview</h3>
+                <canvas id="engagementChart" height="200"></canvas>
+            </div>
+
+            <!-- Attendance List -->
+            <div class="section">
+                <h3>Live Feed</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Engagement</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceList">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>Engagement Metrics</h3>
-            <p style="color: #64748b;">Total Students Present Today</p>
-            <div id="total" class="stat">0</div>
-        </div>
-        <div class="card">
-            <h3>Attendance Log</h3>
-            <table>
-                <thead><tr><th>Student</th><th>Timestamp</th><th>Status</th><th>Engagement</th></tr></thead>
-                <tbody id="list"></tbody>
-            </table>
-        </div>
-    </div>
-
+    <script src="recording.js"></script>
     <script>
         const role = localStorage.getItem('role');
         const user = localStorage.getItem('user');
-        if (!role) location.href = '/login.html';
-        document.getElementById('userInfo').innerText = `${user} (${role})`;
-        
-        // Simplified Logic: Admin removed, Teacher is the privileged role
-        if (role === 'Student') {
-            document.getElementById('btnRecognition').style.display = 'none';
-            document.getElementById('btnReport').style.display = 'none';
+
+        if (!localStorage.getItem('isAuthenticated')) location.href = 'login.html';
+
+        document.getElementById('userName').innerText = user;
+        document.getElementById('userRoleBadge').innerText = role;
+        document.getElementById('dateString').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Role Based UI Logic
+        if (role === 'teacher') {
+            document.getElementById('teacher-controls').style.display = 'block';
+        } else if (role === 'admin') {
+            document.getElementById('nav-admin').style.display = 'flex';
+            document.getElementById('teacher-controls').style.display = 'block';
         }
 
-        function load() {
+        // Chart Initialization
+        const ctx = document.getElementById('engagementChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Drowsy', 'Distracted'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#34d399', '#fbbf24', '#fb7185'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                },
+                cutout: '70%'
+            }
+        });
+
+        function updateUI() {
             fetch('/api/attendance').then(r => r.json()).then(data => {
-                document.getElementById('list').innerHTML = data.map(r => 
-                    `<tr><td><b>${r.name}</b></td><td>${r.time}</td>
-                     <td><span class="badge" style="background:#e0f2fe; color:#0369a1">${r.status}</span></td>
-                     <td><span class="badge">${r.engagement}</span></td></tr>`).join('');
-                document.getElementById('total').innerText = data.length;
+                const list = document.getElementById('attendanceList');
+                list.innerHTML = data.slice(-10).reverse().map(r => `
+                    <tr>
+                        <td>${r.name}</td>
+                        <td><span class="status-badge status-${r.engagement.toLowerCase()}">${r.engagement}</span></td>
+                    </tr>
+                `).join('');
+            });
+
+            fetch('/api/stats').then(r => r.json()).then(stats => {
+                document.getElementById('stat-total').innerText = stats.totalAttendance || 0;
+                document.getElementById('stat-active').innerText = stats.active || 0;
+                document.getElementById('stat-drowsy').innerText = stats.drowsy || 0;
+                document.getElementById('stat-distracted').innerText = stats.distracted || 0;
+
+                chart.data.datasets[0].data = [stats.active, stats.drowsy, stats.distracted];
+                chart.update();
             });
         }
-        function logout() { localStorage.clear(); location.href = '/login.html'; }
-        setInterval(load, 3000); load();
+
+        function startRecognition() {
+            fetch('/api/open-camera', {method: 'POST'})
+                .then(r => r.json())
+                .then(d => console.log('AI System Started'));
+        }
+
+        function resetData() {
+            if (confirm('Are you sure you want to clear all logs?')) {
+                fetch('/api/reset', {method: 'POST'}).then(() => updateUI());
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.href = 'login.html';
+        }
+
+        setInterval(updateUI, 3000);
+        updateUI();
     </script>
 </body>
 </html>

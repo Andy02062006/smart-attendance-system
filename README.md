@@ -1,31 +1,41 @@
-# SmartSense: Smart Attendance & Engagement System
+# SmartSense Pro: Intelligent Attendance & Engagement
 
-SmartSense is an AI-based facial recognition and IoT system designed to automate attendance marking and providing real-time engagement insights.
+SmartSense Pro is a premium, AI-powered system designed for modern classrooms. It automates attendance through facial recognition and provides real-time insights into student engagement, including drowsiness and distraction monitoring.
 
-## Project Architecture (MVC)
+## Professional Features
 
-The project follows the **Model-View-Controller (MVC)** design pattern to ensure clear separation of concerns:
+### 1. Role-Based Dashboards
+The system provides tailored experiences for different users:
+- **Admin**: System-wide controls, data reset, and full reporting.
+- **Teacher**: Lecture initiation, real-time engagement analytics, and secure lecture recording.
+- **Student**: Personal attendance tracking and engagement history.
 
-- **Model**: Located in `attendance.model`. Contains `AttendanceRecord.java` which defines the data structure for student attendance and engagement metrics.
-- **View**: Located in `src/main/resources/static`. Uses `index.html` for the dashboard UI, displaying real-time metrics and records.
-- **Controller**: Located in `attendance.controller`. `AttendanceController.java` manages API requests, triggers the AI script, and coordinates between the View and the Model services.
+### 2. AI-Driven Engagement Monitoring
+Beyond simple attendance, SmartSense Pro uses facial landmarks to track student focus:
+- **Active Focus**: Real-time tracking of presence and attention.
+- **Drowsiness Detection**: Monitors Eye Aspect Ratio (EAR) to detect signs of fatigue.
+- **Distraction Alerts**: Calculates Mouth Aspect Ratio (MAR) to detect yawning or excessive talking.
 
-## Spring Boot Structure
+### 3. Integrated Lecture Recording
+Faculty can record their screens and lectures directly from the dashboard, ensuring educational content is preserved for future review.
 
-Built on the **Spring Boot** framework, the project utilizes:
-- **RESTful APIs**: Exposing endpoints for marking attendance and fetching data.
-- **Static Content Hosting**: Serving the dashboard directly from the `resources/static` directory.
-- **Dependency Injection**: Managing services and controllers for a scalable backend.
+### 4. Professional Analytics
+Real-time doughnut charts and visual metrics provide an immediate overview of classroom dynamics.
 
-## AI & IoT Integration
+---
 
-- **Face Recognition**: A Python-based `smart_attendance.py` script uses the `face_recognition` library and OpenCV to detect and identify registered students.
-- **Data Persistence**: Attendance and engagement data are stored in a centralized `attendance.csv` file, managed by the `CSVService` for easy export and reporting.
+## Technical Architecture (MVC)
+
+- **Model**: `AttendanceRecord.java` manages data structures for attendance and engagement.
+- **View**: A sophisticated, glassmorphism-inspired frontend using HTML5, CSS3, and Chart.js.
+- **Controller**: `AttendanceController.java` routes requests and coordinates AI script triggers.
 
 ---
 
 ## How to Run
 
 1.  **Backend**: Run `./mvnw spring-boot:run` in the project root.
-2.  **Dashboard**: Open `http://localhost:8080` in your browser.
-3.  **Recognition**: Click "Face Recognition & Analysis" on the dashboard to start marking attendance.
+2.  **AI System**: Ensure requirements are installed via `pip install -r requirements.txt`.
+3.  **Dashboard**: Access `http://localhost:8080`.
+4.  **Login**: Choose your role. Use any non-empty credentials for demo purposes.
+5.  **Operation**: Teachers can start AI Analysis and Lecture Recording from their respective panels.

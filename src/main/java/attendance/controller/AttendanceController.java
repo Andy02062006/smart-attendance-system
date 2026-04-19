@@ -32,6 +32,17 @@ public class AttendanceController {
         return a;
     }
 
+    @GetMapping("/stats")
+    public Map<String, Object> stats() {
+        return CSVService.getStats();
+    }
+
+    @PostMapping("/reset")
+    public Map<String, String> reset() {
+        CSVService.resetAttendance();
+        return Collections.singletonMap("status", "success");
+    }
+
     @PostMapping("/open-camera")
     public Map<String, String> camera() {
         try {
