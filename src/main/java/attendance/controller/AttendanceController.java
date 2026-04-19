@@ -1,6 +1,7 @@
 package attendance.controller;
 
 import attendance.model.AttendanceRecord;
+import attendance.model.EngagementAlert;
 import attendance.service.CSVService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,15 @@ public class AttendanceController {
 
     @GetMapping("/attendance")
     public List<AttendanceRecord> get() { return CSVService.getAttendance(); }
+
+    @GetMapping("/active-detections")
+    public List<AttendanceRecord> getDetections() { return CSVService.getDetections(); }
+
+    @PostMapping("/detect")
+    public AttendanceRecord detect(@RequestBody AttendanceRecord a) {
+        CSVService.updateDetection(a);
+        return a;
+    }
 
     @GetMapping("/download")
     public org.springframework.http.ResponseEntity<org.springframework.core.io.Resource> download() {
@@ -37,10 +47,27 @@ public class AttendanceController {
         return CSVService.getStats();
     }
 
+    @GetMapping("/stats/absences")
+    public List<Map<String, Object>> absences() {
+        return CSVService.getAbsenceStats();
+    }
+
     @PostMapping("/reset")
     public Map<String, String> reset() {
         CSVService.resetAttendance();
+        CSVService.clearAlerts();
         return Collections.singletonMap("status", "success");
+    }
+
+    @PostMapping("/alerts")
+    public EngagementAlert addAlert(@RequestBody EngagementAlert alert) {
+        CSVService.addAlert(alert);
+        return alert;
+    }
+
+    @GetMapping("/alerts")
+    public List<EngagementAlert> getAlerts() {
+        return CSVService.getAlerts();
     }
 
     @PostMapping("/open-camera")

@@ -12,19 +12,26 @@
     <div class="sidebar">
         <div class="logo">SmartSense</div>
         <ul class="nav-links">
-            <li class="nav-item active">Dashboard</li>
-            <li id="nav-monitor" class="nav-item" onclick="startRecognition()">Live Monitor</li>
-            <li id="nav-reports" class="nav-item" onclick="location.href='/api/download'">Reports</li>
-            <li id="nav-admin" class="nav-item" style="display:none;" onclick="resetData()">System Reset</li>
+            <li class="nav-item active" onclick="location.reload()">
+                <span>🏠</span> Dashboard
+            </li>
+            <li id="nav-reports" class="nav-item" onclick="location.href='/api/download'">
+                <span>📊</span> Download Report
+            </li>
+            <li id="nav-admin" class="nav-item" style="display:none;" onclick="resetData()">
+                <span>⚙️</span> System Reset
+            </li>
         </ul>
-        <div class="nav-item logout" onclick="logout()">Logout</div>
+        <div class="nav-item logout" onclick="logout()">
+            <span>🚪</span> Logout
+        </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <div>
-                <h1>Welcome Back</h1>
+                <h1 id="welcomeText">Dashboard</h1>
                 <p class="subtitle" id="dateString"></p>
             </div>
             <div class="user-profile">
@@ -36,61 +43,90 @@
         <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <p class="stat-label">Total Present</p>
+                <p class="stat-label">Total Logs</p>
                 <div id="stat-total" class="stat-value">0</div>
             </div>
             <div class="stat-card">
-                <p class="stat-label">Active Focus</p>
-                <div id="stat-active" class="stat-value" style="color: var(--accent-green)">0</div>
+                <p class="stat-label">System Health</p>
+                <div id="stat-active" class="stat-value" style="color: var(--accent-green)">Active</div>
             </div>
-            <div class="stat-card">
-                <p class="stat-label">Drowsy/Tired</p>
-                <div id="stat-drowsy" class="stat-value" style="color: #fbbf24">0</div>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Distracted</p>
-                <div id="stat-distracted" class="stat-value" style="color: var(--accent-red)">0</div>
+            <div class="stat-card" id="absence-summary-card" style="display:none;">
+                <p class="stat-label">Avg Attendance</p>
+                <div id="avg-attendance" class="stat-value" style="color: var(--primary-light)">0%</div>
             </div>
         </div>
 
         <!-- Role Based Controls -->
-        <div id="teacher-controls" class="section" style="display:none; margin-bottom: 24px;">
-            <h3>Lecture Controls</h3>
+        <div id="teacher-controls" class="section" style="display:none; margin-bottom: 32px;">
+            <h3>Lecture Management</h3>
             <div class="controls">
-                <button class="btn btn-primary" onclick="startRecognition()">Start AI Analysis</button>
-                <button id="recordBtn" class="btn btn-outline" onclick="toggleRecording()">Start Lecture Recording</button>
-                <div id="recordingStatus"><span class="pulse">●</span> Recording Live...</div>
+                <button class="btn btn-primary" onclick="startRecognition()">
+                    <span>📹</span> Launch Live AI Detection
+                </button>
             </div>
         </div>
 
+        <div id="student-controls" class="section" style="display:none; margin-bottom: 32px;">
+            <h3>Join Classroom</h3>
+            <div class="controls">
+                <button class="btn btn-primary" style="padding: 24px 48px; font-size: 18px;" onclick="startRecognition()">
+                    <span>🚀</span> Start My AI Monitoring
+                </button>
+            </div>
+            <p style="color: var(--text-secondary); margin-top: 16px;">Click to join the session. The AI will monitor your engagement automatically.</p>
+        </div>
+
         <div class="dashboard-sections">
-            <!-- Analytics Chart -->
-            <div class="section">
-                <h3>Engagement Overview</h3>
-                <canvas id="engagementChart" height="200"></canvas>
+            <!-- Analytics / Alerts -->
+            <div id="chart-section" class="section">
+                <h3 id="panel-title">Engagement Data</h3>
+                <div id="canvas-container">
+                    <canvas id="engagementChart" height="200"></canvas>
+                </div>
+                
+                <div id="alerts-panel" style="margin-top: 40px; display: none;">
+                    <h3>Live Alerts</h3>
+                    <div id="alertList">
+                        <div class="empty-state">No critical alerts detected</div>
+                    </div>
+                </div>
+
+                <div id="absence-panel" style="margin-top: 40px; display: none;">
+                    <h3>Student Absence Insights</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Absences</th>
+                                    <th>Last Seen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absenceList"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <!-- Attendance List -->
+            <!-- Live Feed -->
             <div class="section">
-                <h3>Live Feed</h3>
-                <div style="max-height: 400px; overflow-y: auto;">
+                <h3 id="feed-title">Detection Stream</h3>
+                <div style="max-height: 600px; overflow-y: auto;">
                     <table>
                         <thead>
                             <tr>
                                 <th>Student</th>
-                                <th>Engagement</th>
+                                <th>State</th>
+                                <th id="th-action" style="display:none;">Verify</th>
                             </tr>
                         </thead>
-                        <tbody id="attendanceList">
-                            <!-- Rows injected by JS -->
-                        </tbody>
+                        <tbody id="attendanceList"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="recording.js"></script>
     <script>
         const role = localStorage.getItem('role');
         const user = localStorage.getItem('user');
@@ -99,11 +135,20 @@
 
         document.getElementById('userName').innerText = user;
         document.getElementById('userRoleBadge').innerText = role;
+        document.getElementById('welcomeText').innerText = `Greetings, ${user}`;
         document.getElementById('dateString').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Role Based UI Logic
         if (role === 'teacher') {
             document.getElementById('teacher-controls').style.display = 'block';
+            document.getElementById('alerts-panel').style.display = 'block';
+            document.getElementById('absence-panel').style.display = 'block';
+            document.getElementById('absence-summary-card').style.display = 'block';
+            document.getElementById('th-action').style.display = 'table-cell';
+            document.getElementById('feed-title').innerText = 'Live Classroom Feed';
+        } else if (role === 'student') {
+            document.getElementById('student-controls').style.display = 'block';
+            document.getElementById('chart-section').style.display = 'none';
         } else if (role === 'admin') {
             document.getElementById('nav-admin').style.display = 'flex';
             document.getElementById('teacher-controls').style.display = 'block';
@@ -114,41 +159,96 @@
         const chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Active', 'Drowsy', 'Distracted'],
+                labels: ['Focused', 'Drowsy', 'Distracted'],
                 datasets: [{
                     data: [0, 0, 0],
-                    backgroundColor: ['#34d399', '#fbbf24', '#fb7185'],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 10
                 }]
             },
             options: {
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20, font: { size: 14 } } }
                 },
-                cutout: '70%'
+                cutout: '75%',
+                responsive: true
             }
         });
 
         function updateUI() {
-            fetch('/api/attendance').then(r => r.json()).then(data => {
+            fetch('/api/active-detections').then(r => r.json()).then(data => {
                 const list = document.getElementById('attendanceList');
-                list.innerHTML = data.slice(-10).reverse().map(r => `
+                if (data.length === 0) {
+                    list.innerHTML = '<tr><td colspan="3" class="empty-state">Waiting for AI stream...</td></tr>';
+                    return;
+                }
+                list.innerHTML = data.map(r => `
                     <tr>
-                        <td>${r.name}</td>
-                        <td><span class="status-badge status-${r.engagement.toLowerCase()}">${r.engagement}</span></td>
+                        <td><strong>${r.name}</strong></td>
+                        <td><span class="status-badge status-${r.engagement.toLowerCase().includes('drowsy') ? 'drowsy' : r.engagement.toLowerCase()}">${r.engagement}</span></td>
+                        ${role === 'teacher' ? `<td><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Marked</span></td>` : ''}
                     </tr>
                 `).join('');
             });
 
             fetch('/api/stats').then(r => r.json()).then(stats => {
                 document.getElementById('stat-total').innerText = stats.totalAttendance || 0;
-                document.getElementById('stat-active').innerText = stats.active || 0;
-                document.getElementById('stat-drowsy').innerText = stats.drowsy || 0;
-                document.getElementById('stat-distracted').innerText = stats.distracted || 0;
-
                 chart.data.datasets[0].data = [stats.active, stats.drowsy, stats.distracted];
                 chart.update();
+            });
+
+            if (role === 'teacher') {
+                fetchAlerts();
+                fetchAbsences();
+            }
+        }
+
+        function fetchAlerts() {
+            fetch('/api/alerts').then(r => r.json()).then(alerts => {
+                const list = document.getElementById('alertList');
+                if (alerts.length === 0) {
+                    list.innerHTML = '<div class="empty-state">System secure. No alerts.</div>';
+                    return;
+                }
+                list.innerHTML = alerts.map(a => `
+                    <div class="alert-item ${a.status.includes('CRITICAL') ? 'critical' : ''}">
+                        <span class="alert-time">${a.time}</span>
+                        <strong>${a.name}</strong>: ${a.status}
+                    </div>
+                `).join('');
+            });
+        }
+
+        function fetchAbsences() {
+            fetch('/api/stats/absences').then(r => r.json()).then(data => {
+                const list = document.getElementById('absenceList');
+                list.innerHTML = data.map(s => `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td style="color: ${s.absentCount > 0 ? 'var(--accent-red)' : 'var(--accent-green)'}">${s.absentCount} classes</td>
+                        <td>${s.lastAbsent}</td>
+                    </tr>
+                `).join('');
+                
+                const avg = data.reduce((acc, curr) => acc + curr.attendanceRate, 0) / data.length;
+                document.getElementById('avg-attendance').innerText = `${Math.round(avg)}%`;
+            });
+        }
+
+        function markAttendance(name, engagement) {
+            fetch('/api/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    time: new Date().toISOString().split('T')[0] + " " + new Date().toLocaleTimeString(),
+                    status: 'Present',
+                    engagement: engagement
+                })
+            }).then(() => {
+                alert(`Successfully marked attendance for ${name}`);
+                updateUI();
             });
         }
 
@@ -159,7 +259,7 @@
         }
 
         function resetData() {
-            if (confirm('Are you sure you want to clear all logs?')) {
+            if (confirm('Verify: Clear all historical records and metrics?')) {
                 fetch('/api/reset', {method: 'POST'}).then(() => updateUI());
             }
         }
