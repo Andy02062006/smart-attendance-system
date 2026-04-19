@@ -151,7 +151,8 @@
             document.getElementById('chart-section').style.display = 'none';
         } else if (role === 'admin') {
             document.getElementById('nav-admin').style.display = 'flex';
-            document.getElementById('teacher-controls').style.display = 'block';
+            document.getElementById('feed-title').innerText = 'System Audit Feed';
+            // Admin only sees logs and reset, no camera controls
         }
 
         // Chart Initialization
